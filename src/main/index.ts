@@ -1,15 +1,24 @@
-const path = require('path');
-const { execFile } = require('child_process');
-const { app, BrowserWindow, dialog, globalShortcut, screen } = require('electron');
-const { startGSIServer } = require('../data/gsi-server');
+import path from 'path';
+import { execFile } from 'child_process';
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  globalShortcut,
+  screen
+} from 'electron';
+import { startGSIServer, type GSIServer } from '../data/gsi-server';
+import type { OverlayState } from '../data/types';
+import { broadcastGSIState } from './ipc';
 
 const isDebugMode = process.argv.includes('--debugmodel');
 
-let overlayWindow = null;
-let gsiServer = null;
+let overlayWindow: BrowserWindow | null = null;
+let gsiServer: GSIServer | null = null;
 let isShuttingDown = false;
-let dotaMonitorTimer = null;
-let latestGSIState = {
+let dotaMonitorTimer: NodeJS.Timeout | null = null;
+
+let latestGSIState: OverlayState = {
   connected: false,
   lastUpdated: null,
   system: {
@@ -32,7 +41,15 @@ if (!hasSingleInstanceLock) {
   app.quit();
 }
 
-function createOverlayWindow() {
+function getProjectRoot(): string {
+  return path.resolve(__dirname, '..', '..');
+}
+
+function getUiPath(filename: string): string {
+  return path.join(getProjectRoot(), 'src', 'ui', filename);
+}
+
+function createOverlayWindow(): void {
   const primaryDisplay = screen.getPrimaryDisplay();
   const { width } = primaryDisplay.workAreaSize;
 
@@ -60,9 +77,9 @@ function createOverlayWindow() {
 
   overlayWindow.setAlwaysOnTop(true, 'screen-saver');
   overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-  overlayWindow.loadFile(path.join(__dirname, '..', 'ui', 'overlay.html'));
+  void overlayWindow.loadFile(getUiPath('overlay.html'));
   overlayWindow.webContents.on('did-finish-load', () => {
-    broadcastGSIState();
+    broadcastGSIState(overlayWindow, latestGSIState);
   });
 
   overlayWindow.on('closed', () => {
@@ -70,13 +87,13 @@ function createOverlayWindow() {
   });
 }
 
-function registerShortcuts() {
+function registerShortcuts(): void {
   globalShortcut.register('CommandOrControl+Shift+Q', () => {
     app.quit();
   });
 }
 
-function updateSystemState(patch) {
+function updateSystemState(patch: Partial<OverlayState['system']>): void {
   latestGSIState = {
     ...latestGSIState,
     system: {
@@ -85,18 +102,10 @@ function updateSystemState(patch) {
     }
   };
 
-  broadcastGSIState();
+  broadcastGSIState(overlayWindow, latestGSIState);
 }
 
-function broadcastGSIState() {
-  if (!overlayWindow || overlayWindow.isDestroyed()) {
-    return;
-  }
-
-  overlayWindow.webContents.send('gsi:update', latestGSIState);
-}
-
-function focusOverlayWindow() {
+function focusOverlayWindow(): void {
   if (!overlayWindow) {
     return;
   }
@@ -109,7 +118,7 @@ function focusOverlayWindow() {
   overlayWindow.focus();
 }
 
-function detectDotaRunning() {
+function detectDotaRunning(): Promise<boolean> {
   return new Promise((resolve) => {
     if (process.platform !== 'win32') {
       resolve(false);
@@ -132,8 +141,8 @@ function detectDotaRunning() {
   });
 }
 
-function startDotaMonitor() {
-  const refresh = async () => {
+function startDotaMonitor(): void {
+  const refresh = async (): Promise<void> => {
     if (isShuttingDown) {
       return;
     }
@@ -144,11 +153,13 @@ function startDotaMonitor() {
     }
   };
 
-  refresh();
-  dotaMonitorTimer = setInterval(refresh, 3000);
+  void refresh();
+  dotaMonitorTimer = setInterval(() => {
+    void refresh();
+  }, 3000);
 }
 
-function stopDotaMonitor() {
+function stopDotaMonitor(): void {
   if (!dotaMonitorTimer) {
     return;
   }
@@ -157,7 +168,7 @@ function stopDotaMonitor() {
   dotaMonitorTimer = null;
 }
 
-function closeGSIServer() {
+function closeGSIServer(): Promise<void> {
   return new Promise((resolve) => {
     if (!gsiServer) {
       resolve();
@@ -168,14 +179,14 @@ function closeGSIServer() {
     gsiServer = null;
 
     serverToClose.close(() => {
-      const port = serverToClose.__gsiPort || 'unknown';
+      const port = serverToClose.__gsiPort ?? 'unknown';
       console.log(`[GSI] Server on port ${port} closed`);
       resolve();
     });
   });
 }
 
-async function gracefulShutdown(reason) {
+async function gracefulShutdown(reason: string): Promise<void> {
   if (isShuttingDown) {
     return;
   }
@@ -196,6 +207,7 @@ if (hasSingleInstanceLock) {
 
 app.whenReady().then(() => {
   createOverlayWindow();
+
   gsiServer = startGSIServer({
     onListening: ({ port }) => {
       updateSystemState({
@@ -208,7 +220,7 @@ app.whenReady().then(() => {
         updateSystemState({ gsiListening: false });
       }
     },
-    onPayload: (_payload, summary) => {
+    onEvent: (_event, summary) => {
       latestGSIState = {
         connected: true,
         lastUpdated: new Date().toISOString(),
@@ -219,25 +231,24 @@ app.whenReady().then(() => {
         summary
       };
 
-      broadcastGSIState();
+      broadcastGSIState(overlayWindow, latestGSIState);
     }
   });
+
   registerShortcuts();
   startDotaMonitor();
 
-  if (gsiServer) {
-    gsiServer.on('error', (error) => {
-      if (error.code !== 'EADDRINUSE') {
-        return;
-      }
+  gsiServer.on('error', (error: Error & { code?: string }) => {
+    if (error.code !== 'EADDRINUSE') {
+      return;
+    }
 
-      dialog.showErrorBox(
-        'GSI Port In Use',
-        '127.0.0.1:3001 is already in use.\n\n' +
+    dialog.showErrorBox(
+      'GSI Port In Use',
+      '127.0.0.1:3001 is already in use.\n\n' +
         'Close the old DotaPartner process or the other local service using this port, then start the app again.'
-      );
-    });
-  }
+    );
+  });
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -277,3 +288,4 @@ process.on('uncaughtException', async (error) => {
   await gracefulShutdown('uncaughtException');
   process.exit(1);
 });
+

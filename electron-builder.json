@@ -2,7 +2,8 @@
   "appId": "com.dotapartner.app",
   "productName": "DotaPartner",
   "files": [
-    "src/**/*",
+    "dist/**/*",
+    "src/ui/**/*",
     "package.json"
   ]
 }

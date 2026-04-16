@@ -7,6 +7,7 @@
 - npm `10.9.3`
 
 - 当前项目使用 Electron `30.5.1`
+- 当前基线使用 TypeScript 编译到 `dist/` 后再启动 Electron
 
 ## 当前目标
 
@@ -21,6 +22,11 @@ npm install
 npm start
 ```
 
+单独编译：
+```cmd
+npm run build
+```
+
 启动 debugmodel：
 ```cmd
 npm run start:debugmodel
@@ -30,6 +36,14 @@ npm run start:debugmodel
 
 - 打开置顶 Overlay 窗口
 - 在 `http://127.0.0.1:3001/gsi` 启动本地 GSI 服务
+
+当前目录基线：
+
+- `src/main`：Electron 主进程、preload、IPC
+- `src/data`：GSI 接收器与数据类型
+- `src/shared`：跨进程共享常量
+- `src/ui`：当前 Overlay 静态界面资源
+- `dist`：TypeScript 编译输出，运行时入口
 
 端口说明：
 
@@ -104,4 +118,5 @@ http://127.0.0.1:3001/gsi
 - 当前版本是技术验证，不是最终产品 UI
 - 当前版本已经具备最小 GSI 收包能力
 - 当前版本已经具备最小 GSI 到 Overlay 的联动能力
+- 当前版本已完成 M3 第一版基线改造：主进程、preload、GSI 服务已迁移到 TypeScript
 - 如果进程被强制杀掉，系统来不及优雅释放端口，此时仍需要手动结束残留进程

@@ -2,10 +2,11 @@
   "name": "dotapartner",
   "version": "0.1.0",
   "description": "DotaPartner overlay prototype",
-  "main": "src/main/index.js",
+  "main": "dist/main/index.js",
   "scripts": {
-    "start": "electron .",
-    "start:debugmodel": "electron . --debugmodel"
+    "build": "tsc -p tsconfig.json",
+    "start": "npm run build && electron .",
+    "start:debugmodel": "npm run build && electron . --debugmodel"
   },
   "keywords": [
     "dota2",
@@ -15,6 +16,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^30.5.1"
+    "@types/node": "^25.6.0",
+    "electron": "^30.5.1",
+    "typescript": "^6.0.2"
   }
 }
