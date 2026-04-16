@@ -128,7 +128,7 @@ function renderState(state) {
   if (hintElement) {
     hintElement.textContent = debugMode
       ? 'Press Ctrl+Shift+Q to quit'
-      : 'Run with --debug to show full diagnostics';
+      : 'Run with --debugmodel to show full diagnostics';
   }
 }
 

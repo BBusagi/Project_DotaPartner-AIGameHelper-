@@ -48,10 +48,10 @@ npm install
 npm start
 ```
 
-启动 debug 模式：
+启动 debugmodel：
 
 ```cmd
-npm run start:debug
+npm run start:debugmodel
 ```
 
 当前应用启动后会同时做两件事：
@@ -85,7 +85,7 @@ npm install
   - 等待启动 Dota
   - Dota 已启动，等待游戏数据
   - GSI 已连接，显示当前简要信息
-- `--debug` 模式会额外显示完整系统状态：
+- `--debugmodel` 模式会额外显示完整系统状态：
   - Dota 是否运行
   - GSI 是否监听
   - 当前是否已收到数据
@@ -125,7 +125,7 @@ http://127.0.0.1:3001/gsi
   - Dota 未启动时，只显示“启动 Dota”的下一步提示
   - Dota 已启动但还没数据时，只显示“等待游戏数据”
   - 收到 GSI 后显示当前英雄和时间等简要信息
-- Debug 模式下：
+- Debugmodel 模式下：
   - 会额外显示 `Dota`、`GSI`、`Data` 三项系统状态
   - 会显示玩家名、英雄名、游戏状态和游戏时间
 

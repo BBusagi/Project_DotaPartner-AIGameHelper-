@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-const debugFlag = process.argv.find((arg) => arg.startsWith('--overlay-debug='));
-const debugMode = debugFlag === '--overlay-debug=true';
+const debugFlag = process.argv.find((arg) => arg.startsWith('--debugmodel='));
+const debugMode = debugFlag === '--debugmodel=true';
 
 contextBridge.exposeInMainWorld('dotapartner', {
   version: '0.1.0',
