@@ -42,6 +42,7 @@ DotaPartner 是一个基于 AI 的 Dota 2 战略助教桌面应用。
 - 本机玩家视角优先，避免假设能实时拿到完整 10 人数据
 - 接口先收敛，再扩展能力
 - 版本隔离必须明确，禁止跨 patch 混算统计
+- README 面向最终用户，只保留启动方式、必要配置和最小排障；面向 AI/开发的过程说明、里程碑细节和实现约束应优先写入 AGENTS.md 或代码内相邻文档，而不是堆入 README
 
 ---
 
@@ -132,7 +133,7 @@ MVP 不承诺：
 
 推荐 GSI 配置文件路径：
 
-`Steam/steamapps/common/dota 2 beta/game/dota/cfg/gamestate_integration_dotapartner.cfg`
+`Steam/steamapps/common/dota 2 beta/game/dota/cfg/gamestate_integration/gamestate_integration_dotapartner.cfg`
 
 推荐配置：
 

@@ -5,6 +5,7 @@
   "main": "dist/main/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "rebuild:native": "npm rebuild better-sqlite3 --runtime=electron --target=30.5.1 --dist-url=https://electronjs.org/headers",
     "start": "npm run build && electron .",
     "start:debugmodel": "npm run build && electron . --debugmodel"
   },
@@ -19,5 +20,9 @@
     "@types/node": "^25.6.0",
     "electron": "^30.5.1",
     "typescript": "^6.0.2"
+  },
+  "dependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "better-sqlite3": "^12.9.0"
   }
 }

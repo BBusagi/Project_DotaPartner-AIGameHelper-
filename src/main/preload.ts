@@ -9,6 +9,9 @@ const packageJson = require('../../package.json') as { version: string };
 contextBridge.exposeInMainWorld('dotapartner', {
   version: packageJson.version,
   debugMode,
+  quitApp() {
+    ipcRenderer.send(IPC_CHANNELS.appQuit);
+  },
   onGSIUpdate(callback: (state: OverlayState) => void) {
     if (typeof callback !== 'function') {
       return () => {};
@@ -25,4 +28,3 @@ contextBridge.exposeInMainWorld('dotapartner', {
     };
   }
 });
-

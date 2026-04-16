@@ -5,9 +5,11 @@ import {
   BrowserWindow,
   dialog,
   globalShortcut,
+  ipcMain,
   screen
 } from 'electron';
 import { startGSIServer, type GSIServer } from '../data/gsi-server';
+import { closeDatabase, initializeDatabase } from '../db/database';
 import type { OverlayState } from '../data/types';
 import { broadcastGSIState } from './ipc';
 
@@ -54,9 +56,9 @@ function createOverlayWindow(): void {
   const { width } = primaryDisplay.workAreaSize;
 
   overlayWindow = new BrowserWindow({
-    width: 360,
-    height: isDebugMode ? 220 : 150,
-    x: Math.max(width - 380, 0),
+    width: isDebugMode ? 460 : 360,
+    height: isDebugMode ? 320 : 150,
+    x: Math.max(width - (isDebugMode ? 480 : 380), 0),
     y: 24,
     frame: false,
     transparent: false,
@@ -196,6 +198,7 @@ async function gracefulShutdown(reason: string): Promise<void> {
 
   stopDotaMonitor();
   await closeGSIServer();
+  closeDatabase();
   globalShortcut.unregisterAll();
 }
 
@@ -205,7 +208,15 @@ if (hasSingleInstanceLock) {
   });
 }
 
+ipcMain.on('app:quit', () => {
+  app.quit();
+});
+
 app.whenReady().then(() => {
+  const databaseDir = path.join(app.getPath('userData'), 'data');
+  const { dbPath } = initializeDatabase(databaseDir);
+  console.log(`[DB] Initialized SQLite at ${dbPath}`);
+
   createOverlayWindow();
 
   gsiServer = startGSIServer({
@@ -288,4 +299,3 @@ process.on('uncaughtException', async (error) => {
   await gracefulShutdown('uncaughtException');
   process.exit(1);
 });
-

@@ -11,6 +11,7 @@ const dotaStatusElement = document.getElementById('dota-status');
 const gsiStatusElement = document.getElementById('gsi-status');
 const dataStatusElement = document.getElementById('data-status');
 const hintElement = document.getElementById('hint');
+const closeButtonElement = document.getElementById('close-button');
 
 const debugMode = window.dotapartner?.debugMode === true;
 document.body.classList.toggle('debug-mode', debugMode);
@@ -133,6 +134,25 @@ function renderState(state) {
 }
 
 renderState(null);
+
+if (closeButtonElement && typeof window.dotapartner?.quitApp === 'function') {
+  const handleQuit = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (typeof window.close === 'function') {
+      window.close();
+      return;
+    }
+
+    window.dotapartner.quitApp();
+  };
+
+  closeButtonElement.addEventListener('pointerdown', handleQuit);
+  closeButtonElement.addEventListener('mousedown', handleQuit);
+  closeButtonElement.addEventListener('click', handleQuit);
+  closeButtonElement.addEventListener('pointerup', handleQuit);
+}
 
 if (window.dotapartner?.onGSIUpdate) {
   window.dotapartner.onGSIUpdate((state) => {

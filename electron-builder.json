@@ -3,6 +3,7 @@
   "productName": "DotaPartner",
   "files": [
     "dist/**/*",
+    "src/db/schema.sql",
     "src/ui/**/*",
     "package.json"
   ]
