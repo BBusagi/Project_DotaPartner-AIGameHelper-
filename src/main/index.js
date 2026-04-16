@@ -3,6 +3,8 @@ const { execFile } = require('child_process');
 const { app, BrowserWindow, dialog, globalShortcut, screen } = require('electron');
 const { startGSIServer } = require('../data/gsi-server');
 
+const isDebugMode = process.argv.includes('--debug') || process.argv.includes('debug');
+
 let overlayWindow = null;
 let gsiServer = null;
 let isShuttingDown = false;
@@ -36,7 +38,7 @@ function createOverlayWindow() {
 
   overlayWindow = new BrowserWindow({
     width: 360,
-    height: 220,
+    height: isDebugMode ? 220 : 150,
     x: Math.max(width - 380, 0),
     y: 24,
     frame: false,
@@ -50,6 +52,7 @@ function createOverlayWindow() {
     title: 'DotaPartner Overlay',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      additionalArguments: [isDebugMode ? '--overlay-debug=true' : '--overlay-debug=false'],
       contextIsolation: true,
       nodeIntegration: false
     }

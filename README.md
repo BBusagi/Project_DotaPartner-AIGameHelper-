@@ -48,6 +48,12 @@ npm install
 npm start
 ```
 
+启动 debug 模式：
+
+```cmd
+npm run start:debug
+```
+
 当前应用启动后会同时做两件事：
 
 - 打开置顶 Overlay 窗口
@@ -71,12 +77,19 @@ npm install
 
 - Electron 最小应用
 - 始终置顶窗口
-- Overlay 页面显示基础状态
+- 默认模式下，Overlay 使用递进式精简 UI
 - 本地 GSI HTTP 服务，默认监听 `127.0.0.1:3001/gsi`
 - 收到 GSI payload 后打印摘要和完整 JSON
 - 最新一份 payload 会写入 `tmp/gsi-latest.json`
-- Overlay 会显示最近一条 GSI 摘要：玩家名、英雄名、游戏状态、游戏时间
-- Overlay 会显示系统状态：Dota 是否运行、GSI 是否监听、当前是否已收到数据
+- 默认模式会按流程提示：
+  - 等待启动 Dota
+  - Dota 已启动，等待游戏数据
+  - GSI 已连接，显示当前简要信息
+- `--debug` 模式会额外显示完整系统状态：
+  - Dota 是否运行
+  - GSI 是否监听
+  - 当前是否已收到数据
+  - 玩家名、英雄名、游戏状态、游戏时间
 - 单实例保护，避免重复启动导致端口冲突
 - `Ctrl+Shift+Q` 退出应用
 
@@ -108,13 +121,13 @@ http://127.0.0.1:3001/gsi
 
 第三个目标的验证标准是：
 
-- Overlay 初始显示 `Waiting for GSI`
-- 收到 GSI payload 后，Overlay 状态变为 `GSI Connected`
-- Overlay 上的玩家名、英雄名、游戏状态和游戏时间会同步刷新
-- Overlay 会额外显示：
-  - `Dota`: 是否检测到 `dota2.exe`
-  - `GSI`: 是否成功监听 `127.0.0.1:3001`
-  - `Data`: 当前是否至少收到过一条 payload
+- 默认模式下：
+  - Dota 未启动时，只显示“启动 Dota”的下一步提示
+  - Dota 已启动但还没数据时，只显示“等待游戏数据”
+  - 收到 GSI 后显示当前英雄和时间等简要信息
+- Debug 模式下：
+  - 会额外显示 `Dota`、`GSI`、`Data` 三项系统状态
+  - 会显示玩家名、英雄名、游戏状态和游戏时间
 
 ## 说明
 
