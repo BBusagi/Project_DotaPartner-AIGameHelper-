@@ -1,0 +1,19 @@
+{
+  "name": "dotapartner",
+  "version": "0.1.0",
+  "description": "DotaPartner overlay prototype",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "dota2",
+    "electron",
+    "overlay"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^30.5.1"
+  }
+}

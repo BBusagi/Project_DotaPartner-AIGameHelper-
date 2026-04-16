@@ -1,0 +1,59 @@
+:root {
+  color-scheme: dark;
+  --bg: rgba(16, 20, 24, 0.94);
+  --border: rgba(130, 255, 193, 0.35);
+  --text: #f5fffa;
+  --muted: #9bb3a8;
+  --accent: #82ffc1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: transparent;
+  color: var(--text);
+}
+
+.overlay-card {
+  margin: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background:
+    radial-gradient(circle at top right, rgba(130, 255, 193, 0.16), transparent 38%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    var(--bg);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.headline {
+  margin-top: 6px;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.meta {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.hint {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--muted);
+}

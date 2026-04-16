@@ -1,0 +1,8 @@
+{
+  "appId": "com.dotapartner.app",
+  "productName": "DotaPartner",
+  "files": [
+    "src/**/*",
+    "package.json"
+  ]
+}
