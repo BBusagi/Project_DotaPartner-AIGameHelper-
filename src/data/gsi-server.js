@@ -36,7 +36,7 @@ function summarizePayload(payload) {
   };
 }
 
-function createRequestHandler() {
+function createRequestHandler(onPayload) {
   return (request, response) => {
     if (request.method !== 'POST' || request.url !== DEFAULT_GSI_PATH) {
       response.writeHead(404, { 'Content-Type': 'application/json' });
@@ -57,6 +57,10 @@ function createRequestHandler() {
         writeLatestPayload(payload);
 
         const summary = summarizePayload(payload);
+        if (typeof onPayload === 'function') {
+          onPayload(payload, summary);
+        }
+
         console.log('[GSI] Payload received:', summary);
         console.log('[GSI] Full payload:');
         console.log(JSON.stringify(payload, null, 2));
@@ -78,16 +82,27 @@ function createRequestHandler() {
   };
 }
 
-function startGSIServer(port = DEFAULT_GSI_PORT) {
-  const server = http.createServer(createRequestHandler());
+function startGSIServer(options = {}) {
+  const port = options.port || DEFAULT_GSI_PORT;
+  const onPayload = options.onPayload;
+  const onListening = options.onListening;
+  const onError = options.onError;
+  const server = http.createServer(createRequestHandler(onPayload));
   server.__gsiPort = port;
 
   server.listen(port, '127.0.0.1', () => {
     console.log(`[GSI] Listening on http://127.0.0.1:${port}${DEFAULT_GSI_PATH}`);
     console.log('[GSI] Latest payload file: tmp/gsi-latest.json');
+    if (typeof onListening === 'function') {
+      onListening({ port, path: DEFAULT_GSI_PATH });
+    }
   });
 
   server.on('error', (error) => {
+    if (typeof onError === 'function') {
+      onError(error);
+    }
+
     if (error.code === 'EADDRINUSE') {
       console.error(
         `[GSI] Port ${port} is already in use. ` +
@@ -105,5 +120,6 @@ function startGSIServer(port = DEFAULT_GSI_PORT) {
 module.exports = {
   DEFAULT_GSI_PATH,
   DEFAULT_GSI_PORT,
+  summarizePayload,
   startGSIServer
 };

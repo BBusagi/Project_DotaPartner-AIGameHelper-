@@ -1,10 +1,28 @@
 const path = require('path');
+const { execFile } = require('child_process');
 const { app, BrowserWindow, dialog, globalShortcut, screen } = require('electron');
 const { startGSIServer } = require('../data/gsi-server');
 
 let overlayWindow = null;
 let gsiServer = null;
 let isShuttingDown = false;
+let dotaMonitorTimer = null;
+let latestGSIState = {
+  connected: false,
+  lastUpdated: null,
+  system: {
+    dotaRunning: false,
+    gsiListening: false,
+    hasData: false,
+    gsiPort: 3001
+  },
+  summary: {
+    gameState: 'waiting',
+    gameTime: null,
+    heroName: 'unknown',
+    playerName: 'unknown'
+  }
+};
 
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
 
@@ -18,7 +36,7 @@ function createOverlayWindow() {
 
   overlayWindow = new BrowserWindow({
     width: 360,
-    height: 120,
+    height: 220,
     x: Math.max(width - 380, 0),
     y: 24,
     frame: false,
@@ -40,6 +58,9 @@ function createOverlayWindow() {
   overlayWindow.setAlwaysOnTop(true, 'screen-saver');
   overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   overlayWindow.loadFile(path.join(__dirname, '..', 'ui', 'overlay.html'));
+  overlayWindow.webContents.on('did-finish-load', () => {
+    broadcastGSIState();
+  });
 
   overlayWindow.on('closed', () => {
     overlayWindow = null;
@@ -50,6 +71,26 @@ function registerShortcuts() {
   globalShortcut.register('CommandOrControl+Shift+Q', () => {
     app.quit();
   });
+}
+
+function updateSystemState(patch) {
+  latestGSIState = {
+    ...latestGSIState,
+    system: {
+      ...latestGSIState.system,
+      ...patch
+    }
+  };
+
+  broadcastGSIState();
+}
+
+function broadcastGSIState() {
+  if (!overlayWindow || overlayWindow.isDestroyed()) {
+    return;
+  }
+
+  overlayWindow.webContents.send('gsi:update', latestGSIState);
 }
 
 function focusOverlayWindow() {
@@ -63,6 +104,54 @@ function focusOverlayWindow() {
 
   overlayWindow.show();
   overlayWindow.focus();
+}
+
+function detectDotaRunning() {
+  return new Promise((resolve) => {
+    if (process.platform !== 'win32') {
+      resolve(false);
+      return;
+    }
+
+    execFile(
+      'tasklist',
+      ['/FI', 'IMAGENAME eq dota2.exe', '/FO', 'CSV', '/NH'],
+      { windowsHide: true },
+      (error, stdout) => {
+        if (error) {
+          resolve(false);
+          return;
+        }
+
+        resolve(stdout.toLowerCase().includes('dota2.exe'));
+      }
+    );
+  });
+}
+
+function startDotaMonitor() {
+  const refresh = async () => {
+    if (isShuttingDown) {
+      return;
+    }
+
+    const dotaRunning = await detectDotaRunning();
+    if (dotaRunning !== latestGSIState.system.dotaRunning) {
+      updateSystemState({ dotaRunning });
+    }
+  };
+
+  refresh();
+  dotaMonitorTimer = setInterval(refresh, 3000);
+}
+
+function stopDotaMonitor() {
+  if (!dotaMonitorTimer) {
+    return;
+  }
+
+  clearInterval(dotaMonitorTimer);
+  dotaMonitorTimer = null;
 }
 
 function closeGSIServer() {
@@ -91,6 +180,7 @@ async function gracefulShutdown(reason) {
   isShuttingDown = true;
   console.log(`[App] Shutting down: ${reason}`);
 
+  stopDotaMonitor();
   await closeGSIServer();
   globalShortcut.unregisterAll();
 }
@@ -103,8 +193,34 @@ if (hasSingleInstanceLock) {
 
 app.whenReady().then(() => {
   createOverlayWindow();
-  gsiServer = startGSIServer();
+  gsiServer = startGSIServer({
+    onListening: ({ port }) => {
+      updateSystemState({
+        gsiListening: true,
+        gsiPort: port
+      });
+    },
+    onError: (error) => {
+      if (error.code === 'EADDRINUSE') {
+        updateSystemState({ gsiListening: false });
+      }
+    },
+    onPayload: (_payload, summary) => {
+      latestGSIState = {
+        connected: true,
+        lastUpdated: new Date().toISOString(),
+        system: {
+          ...latestGSIState.system,
+          hasData: true
+        },
+        summary
+      };
+
+      broadcastGSIState();
+    }
+  });
   registerShortcuts();
+  startDotaMonitor();
 
   if (gsiServer) {
     gsiServer.on('error', (error) => {

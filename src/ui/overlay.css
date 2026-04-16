@@ -52,6 +52,60 @@ body {
   color: var(--muted);
 }
 
+.status-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(130, 255, 193, 0.14);
+  color: var(--accent);
+}
+
+.status-pill.muted {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+}
+
+.payload-grid {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 4px 8px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.section-title {
+  margin-top: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.payload-label {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.payload-value {
+  color: var(--text);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .hint {
   margin-top: 10px;
   font-size: 11px;

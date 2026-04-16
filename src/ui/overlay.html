@@ -13,8 +13,29 @@
   <body>
     <main class="overlay-card">
       <div class="eyebrow">DotaPartner</div>
-      <div class="headline">HelloWorld</div>
-      <div class="meta">Overlay prototype is running</div>
+      <div class="headline" id="headline">HelloWorld</div>
+      <div class="meta" id="meta">Overlay prototype is running</div>
+      <div class="status-row">
+        <div class="status-pill" id="connection-status">Waiting for GSI</div>
+        <div class="status-pill muted" id="game-state">State: waiting</div>
+      </div>
+      <div class="payload-grid">
+        <div class="payload-label">Player</div>
+        <div class="payload-value" id="player-name">unknown</div>
+        <div class="payload-label">Hero</div>
+        <div class="payload-value" id="hero-name">unknown</div>
+        <div class="payload-label">Game Time</div>
+        <div class="payload-value" id="game-time">n/a</div>
+      </div>
+      <div class="section-title">System Status</div>
+      <div class="payload-grid">
+        <div class="payload-label">Dota</div>
+        <div class="payload-value" id="dota-status">not running</div>
+        <div class="payload-label">GSI</div>
+        <div class="payload-value" id="gsi-status">not listening</div>
+        <div class="payload-label">Data</div>
+        <div class="payload-value" id="data-status">no data</div>
+      </div>
       <div class="hint">Press Ctrl+Shift+Q to quit</div>
     </main>
     <script src="./renderer.js"></script>
