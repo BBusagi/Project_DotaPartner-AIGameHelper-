@@ -3,23 +3,10 @@
 当前仓库的第一阶段目标是验证 Dota 客户端上层显示能力。
 
 ## 开发环境
-
-当前仓库按以下环境开发和验证：
-
-- Windows 10 / 11
 - Node.js `22.20.0`
 - npm `10.9.3`
 
-说明：
-
 - 当前项目使用 Electron `30.5.1`
-- 如果机器上有多个 Node 版本，建议使用 `nvm` 切换到 `22.20.0`
-
-切换示例：
-
-```cmd
-nvm use 22.20.0
-```
 
 ## 当前目标
 
@@ -28,28 +15,13 @@ nvm use 22.20.0
 3. Overlay 与 GSI 联动
 
 ## 本地运行
-
-先确认版本：
-
-```cmd
-node -v
-npm -v
-```
-
-先安装依赖：
-
+初始化
 ```cmd
 npm install
-```
-
-启动第一个目标：
-
-```cmd
 npm start
 ```
 
 启动 debugmodel：
-
 ```cmd
 npm run start:debugmodel
 ```
@@ -64,14 +36,6 @@ npm run start:debugmodel
 - GSI 默认使用固定端口 `3001`
 - 如果端口已经被占用，应用会明确报错
 - 当前版本不会自动切换到别的端口，因为 Dota 的 GSI 配置文件也必须和端口保持一致
-
-如果之前曾在旧版 Node 环境下安装过依赖，先清理再重装：
-
-```cmd
-rmdir /s /q node_modules
-del package-lock.json
-npm install
-```
 
 ## 当前实现
 
@@ -102,8 +66,13 @@ npm install
 你可以把它复制到 Dota 2 的配置目录：
 
 ```text
-Steam/steamapps/common/dota 2 beta/game/dota/cfg/
+Steam/steamapps/common/dota 2 beta/game/dota/cfg/gamestate_integration/
 ```
+
+已验证：
+
+- `gamestate_integration_dotapartner.cfg` 需要放在 `cfg/gamestate_integration/` 子目录下，放在 `cfg/` 根目录时，当前环境下 Dota 不会发送 GSI 数据
+- 当前环境下未额外配置 `-gamestateintegration` 启动参数，也可以正常收到 GSI payload
 
 模板中的回调地址是：
 
@@ -118,6 +87,7 @@ http://127.0.0.1:3001/gsi
 - Electron 应用运行时，本地 `3001` 端口可接收 GSI POST
 - 收到 payload 后控制台能打印内容
 - `tmp/gsi-latest.json` 会更新为最近一次收到的 payload
+- Dota 侧配置文件已放入 `game/dota/cfg/gamestate_integration/`
 
 第三个目标的验证标准是：
 
