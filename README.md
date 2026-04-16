@@ -75,3 +75,7 @@ Steam/steamapps/common/dota 2 beta/game/dota/cfg/gamestate_integration/
 ```powershell
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3001/gsi -ContentType "application/json" -Body '{"map":{"game_state":"DOTA_GAMERULES_STATE_GAME_IN_PROGRESS","game_time":123},"hero":{"name":"npc_dota_hero_axe"},"player":{"name":"test"}}'
 ```
+
+## TODO
+
+- 修复 Overlay 内置退出按钮；当前请使用 `Ctrl+Shift+Q` 退出应用

@@ -21,10 +21,10 @@ body {
 
 .overlay-card {
   position: relative;
+  overflow: hidden;
   margin: 12px;
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 14px 16px;
   background:
     radial-gradient(circle at top right, rgba(130, 255, 193, 0.16), transparent 38%),
     linear-gradient(160deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
@@ -32,22 +32,14 @@ body {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
 }
 
-.overlay-toolbar {
+.drag-strip {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin: -4px -4px 8px;
-  -webkit-app-region: no-drag;
-}
-
-.drag-handle {
-  display: inline-flex;
-  align-items: center;
-  min-width: 34px;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   color: var(--muted);
   -webkit-app-region: drag;
   user-select: none;
@@ -60,42 +52,47 @@ body {
   transform: translateY(-1px);
 }
 
-.toolbar-button {
+.drag-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.content-shell {
+  position: relative;
+  padding: 14px 16px;
+}
+
+.floating-close-button {
+  position: absolute;
+  top: 42px;
+  right: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border: 0;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
   color: var(--muted);
   cursor: pointer;
   -webkit-app-region: no-drag;
-  pointer-events: auto;
+  z-index: 3;
   transition:
     background 120ms ease,
     color 120ms ease,
     transform 120ms ease;
 }
 
-.toolbar-button:hover {
-  background: rgba(255, 255, 255, 0.14);
-  color: var(--text);
-}
-
-.toolbar-button:active {
-  transform: scale(0.96);
-}
-
-.close-button {
-  font-size: 18px;
-  line-height: 1;
-}
-
-.close-button:hover {
+.floating-close-button:hover {
   background: rgba(255, 96, 96, 0.18);
   color: #ffd4d4;
+}
+
+.floating-close-button:active {
+  transform: scale(0.96);
 }
 
 body:not(.debug-mode) .overlay-card {
@@ -104,11 +101,15 @@ body:not(.debug-mode) .overlay-card {
 
 body.debug-mode .overlay-card {
   min-height: 286px;
+}
+
+body.debug-mode .content-shell {
   padding: 18px 20px;
 }
 
-body.debug-mode .overlay-toolbar {
-  margin-bottom: 10px;
+body.debug-mode .floating-close-button {
+  top: 46px;
+  right: 18px;
 }
 
 .eyebrow {
@@ -121,6 +122,7 @@ body.debug-mode .overlay-toolbar {
 
 .headline {
   margin-top: 6px;
+  padding-right: 40px;
   font-size: 32px;
   font-weight: 800;
   line-height: 1;
@@ -128,6 +130,7 @@ body.debug-mode .overlay-toolbar {
 
 .meta {
   margin-top: 8px;
+  padding-right: 32px;
   font-size: 13px;
   color: var(--muted);
 }
